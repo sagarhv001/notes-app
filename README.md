@@ -44,7 +44,7 @@ postgresql://sagar:qn7cOQvaBwYVvNdn3mq2tnYEK7xi1DIg@dpg-d58oajqli9vc73a6rmh0-a/n
    - Connect your GitHub repository.
    - **Environment**: Python
    - **Build Command**: `./build.sh`
-   - **Start Command**: `gunicorn notesapp.wsgi`
+   - **Start Command**: `gunicorn notesapp.wsgi:application`
 5. **Add Environment Variables**:
    - `SECRET_KEY`: A long random string.
    - `DATABASE_URL`: Your Render PostgreSQL URL.
