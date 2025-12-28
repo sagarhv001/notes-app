@@ -39,6 +39,7 @@ A responsive web application for taking notes and managing tasks, built with Dja
 1. **Create a Render account** at [render.com](https://render.com).
 2. **Create a new PostgreSQL database** on Render (Free tier).
 3. **Copy the Internal Database URL**.
+postgresql://sagar:qn7cOQvaBwYVvNdn3mq2tnYEK7xi1DIg@dpg-d58oajqli9vc73a6rmh0-a/notes_app_db_3b5r
 4. **Create a new Web Service** on Render:
    - Connect your GitHub repository.
    - **Environment**: Python
