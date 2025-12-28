@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - NotesApp{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="fw-bold">Welcome back, {{ user.username }}!</h2>
+        <p class="text-muted">Here's what's happening with your notes and tasks.</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{% url 'note_create' %}" class="btn btn-primary me-2">
+            <i class="fas fa-plus me-1"></i>New Note
+        </a>
+        <a href="{% url 'task_create' %}" class="btn btn-outline-primary">
+            <i class="fas fa-check me-1"></i>New Task
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0">Total Notes</h6>
+                    <h3 class="mb-0 fw-bold">{{ total_notes }}</h3>
+                </div>
+                <i class="fas fa-sticky-note fa-2x opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0">Total Tasks</h6>
+                    <h3 class="mb-0 fw-bold">{{ total_tasks }}</h3>
+                </div>
+                <i class="fas fa-tasks fa-2x opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0">Recent Notes</h4>
+            <a href="{% url 'note_list' %}" class="btn btn-sm btn-link">View All</a>
+        </div>
+        <div class="row">
+            {% for note in recent_notes %}
+            <div class="col-12 mb-3">
+                <div class="card note-card-{{ note.color }} h-100">
+                    <div class="card-body">
+                        {% if note.is_pinned %}
+                        <i class="fas fa-thumbtack pinned-badge"></i>
+                        {% endif %}
+                        <h5 class="card-title fw-bold">{{ note.title }}</h5>
+                        <p class="card-text text-truncate">{{ note.content }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">{{ note.updated_at|timesince }} ago</small>
+                            <a href="{% url 'note_detail' note.pk %}" class="btn btn-sm btn-outline-dark">View</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="card p-4 text-center">
+                    <p class="mb-0">No notes yet. Start by creating one!</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0">Pending Tasks</h4>
+            <a href="{% url 'task_list' %}" class="btn btn-sm btn-link">View All</a>
+        </div>
+        <div class="card">
+            <ul class="list-group list-group-flush">
+                {% for task in pending_tasks %}
+                <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <h6 class="mb-0 fw-bold">{{ task.title }}</h6>
+                        <small class="text-muted d-block">Due: {{ task.due_date|default:"No date" }}</small>
+                        <small class="text-muted">Priority: {{ task.get_priority_display }}</small>
+                    </div>
+                    <span
+                        class="badge bg-{% if task.priority == 'high' %}danger{% elif task.priority == 'medium' %}warning{% else %}info{% endif %}">
+                        {{ task.get_status_display }}
+                    </span>
+                </li>
+                {% empty %}
+                <li class="list-group-item p-4 text-center">
+                    <p class="mb-0">All caught up! No pending tasks.</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

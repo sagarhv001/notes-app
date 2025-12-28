@@ -1,0 +1,130 @@
+{% extends 'base.html' %} {# Test Comment #}
+
+{% block title %}My Tasks - NotesApp{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">My Tasks</h2>
+    <a href="{% url 'task_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>New Task
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;"></th>
+                                <th>Task</th>
+                                <th>Due Date</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks %}
+                            <tr id="task-row-{{ task.pk }}"
+                                class="{% if task.status == 'completed' %}table-light opacity-75{% endif %}">
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input task-toggle" type="checkbox"
+                                            data-url="{% url 'task_toggle' task.pk %}" {{
+                                            task.is_completed|yesno:"checked," }}>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold {% if task.status == 'completed' %}text-decoration-line-through{% endif %}"
+                                        id="task-title-{{ task.pk }}">
+                                        {{ task.title }}
+                                    </div>
+                                    {% if task.description %}
+                                    <small class="text-muted">{{ task.description|truncatechars:50 }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ task.due_date|default:"-" }}</td>
+                                <td>
+                                    <span
+                                        class="badge bg-{% if task.priority == 'high' %}danger{% elif task.priority == 'medium' %}warning{% else %}info{% endif %}">
+                                        {{ task.get_priority_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span
+                                        class="badge rounded-pill bg-{% if task.status == 'completed' %}success{% elif task.status == 'in_progress' %}primary{% else %}secondary{% endif %}"
+                                        id="task-status-{{ task.pk }}">
+                                        {{ task.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-outline-dark">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'task_delete' task.pk %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center p-5">
+                                    <i class="fas fa-tasks fa-4x text-muted mb-3"></i>
+                                    <h4>No tasks found</h4>
+                                    <p class="text-muted">You're all caught up! Click "New Task" to add something to
+                                        your list.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('.task-toggle').on('change', function () {
+            const checkbox = $(this);
+            const url = checkbox.data('url');
+            const taskId = url.split('/')[2];
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    const statusBadge = $(`#task-status-${taskId}`);
+                    const titleDiv = $(`#task-title-${taskId}`);
+                    const row = $(`#task-row-${taskId}`);
+
+                    if (response.status === 'completed') {
+                        statusBadge.removeClass('bg-secondary bg-primary').addClass('bg-success').text('Completed');
+                        titleDiv.addClass('text-decoration-line-through');
+                        row.addClass('table-light opacity-75');
+                    } else {
+                        statusBadge.removeClass('bg-success').addClass('bg-secondary').text('To Do');
+                        titleDiv.removeClass('text-decoration-line-through');
+                        row.removeClass('table-light opacity-75');
+                    }
+                },
+                error: function () {
+                    alert('Error updating task status');
+                    checkbox.prop('checked', !checkbox.prop('checked'));
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
